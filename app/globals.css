@@ -573,6 +573,27 @@ h2 {
   to { opacity: 1; transform: translateY(0); } 
 }
 
+
+/* --- 404 page: append to app/globals.css --- */
+
+.not-found { min-height:100svh; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; text-align:center; isolation:isolate; color:#fffdf7; background:#3a382f; padding:24px; }
+.not-found::before { content:""; position:absolute; inset:0; z-index:-2; background:linear-gradient(180deg,rgba(31,30,25,.85) 0%,rgba(31,30,25,.55) 45%,rgba(31,30,25,.85) 100%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000' viewBox='0 0 1600 1000'%3E%3Crect width='1600' height='1000' fill='%238a806c'/%3E%3Cpath d='M730 1000V560l310-200 410 260v380' fill='%23655f52'/%3E%3Cpath d='M780 1000V610l260-166v556M1080 1000V605l310 195v200' fill='%23776e5d'/%3E%3Cpath d='M660 1000V745l240-150v405' fill='%23565045'/%3E%3Cpath d='M0 750 590 405l370 235v360H0' fill='%2399907e' opacity='.55'/%3E%3C/svg%3E"); background-size:cover; background-position:center; transform:scale(1.02); animation:drift 16s ease-in-out infinite alternate; }
+.not-found-content { position:relative; width:min(100% - 48px,720px); }
+.not-found .eyebrow { margin:0 0 20px; }
+.error-code { font-family:Manrope,sans-serif; letter-spacing:-.05em; line-height:.9; margin:0; font-weight:600; font-size:clamp(5.5rem,18vw,11rem); color:#e2c791; }
+.not-found h2 { font-family:Manrope,sans-serif; letter-spacing:-.03em; margin:8px 0 0; font-weight:500; font-size:clamp(1.6rem,4vw,2.6rem); color:#fffdf7; }
+.not-found .detail { max-width:420px; margin:22px auto 40px; color:#d8c59f; }
+.form-button { display:inline-flex; gap:15px; align-items:center; padding:16px 21px; border:1px solid rgba(237,223,189,.72); color:#fffdf7; text-decoration:none; font-family:"DM Sans",sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.17em; transition:.25s ease; }
+.form-button span { font-size:1.05rem; line-height:0; transition:transform .25s ease; }
+.form-button:hover,.form-button:focus-visible { background:#e7d9bb; border-color:#e7d9bb; color:#292720; outline:none; }
+.form-button:hover span { transform:translateX(4px); }
+
+@media (max-width:650px) {
+  .error-code { font-size:clamp(4.2rem,22vw,7rem); }
+}
+
+
+
 /* --- Admin dashboard: append to app/globals.css --- */
 
 .admin-dashboard { min-height:100svh; background:var(--paper); color:var(--ink); }
@@ -608,22 +629,30 @@ h2 {
   .admin-table th, .admin-table td { padding:12px 14px; font-size:.85rem; }
 }
 
+/* --- Admin login: append to app/globals.css --- */
+/* Reuses .form-button (from not-found.css) and .modal-error (from admin-dashboard.css) */
 
-/* --- 404 page: append to app/globals.css --- */
+.admin-login-container { min-height:100svh; display:flex; align-items:center; justify-content:center; background:var(--paper); padding:24px; }
 
-.not-found { min-height:100svh; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; text-align:center; isolation:isolate; color:#fffdf7; background:#3a382f; padding:24px; }
-.not-found::before { content:""; position:absolute; inset:0; z-index:-2; background:linear-gradient(180deg,rgba(31,30,25,.85) 0%,rgba(31,30,25,.55) 45%,rgba(31,30,25,.85) 100%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000' viewBox='0 0 1600 1000'%3E%3Crect width='1600' height='1000' fill='%238a806c'/%3E%3Cpath d='M730 1000V560l310-200 410 260v380' fill='%23655f52'/%3E%3Cpath d='M780 1000V610l260-166v556M1080 1000V605l310 195v200' fill='%23776e5d'/%3E%3Cpath d='M660 1000V745l240-150v405' fill='%23565045'/%3E%3Cpath d='M0 750 590 405l370 235v360H0' fill='%2399907e' opacity='.55'/%3E%3C/svg%3E"); background-size:cover; background-position:center; transform:scale(1.02); animation:drift 16s ease-in-out infinite alternate; }
-.not-found-content { position:relative; width:min(100% - 48px,720px); }
-.not-found .eyebrow { margin:0 0 20px; }
-.error-code { font-family:Manrope,sans-serif; letter-spacing:-.05em; line-height:.9; margin:0; font-weight:600; font-size:clamp(5.5rem,18vw,11rem); color:#e2c791; }
-.not-found h2 { font-family:Manrope,sans-serif; letter-spacing:-.03em; margin:8px 0 0; font-weight:500; font-size:clamp(1.6rem,4vw,2.6rem); color:#fffdf7; }
-.not-found .detail { max-width:420px; margin:22px auto 40px; color:#d8c59f; }
-.form-button { display:inline-flex; gap:15px; align-items:center; padding:16px 21px; border:1px solid rgba(237,223,189,.72); color:#fffdf7; text-decoration:none; font-family:"DM Sans",sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.17em; transition:.25s ease; }
-.form-button span { font-size:1.05rem; line-height:0; transition:transform .25s ease; }
-.form-button:hover,.form-button:focus-visible { background:#e7d9bb; border-color:#e7d9bb; color:#292720; outline:none; }
-.form-button:hover span { transform:translateX(4px); }
+.admin-login-card { width:100%; max-width:440px; background:var(--cream); border:1px solid var(--line); border-top:4px solid var(--ink); padding:40px 32px; }
+.admin-login-card h2 { font-family:Manrope,sans-serif; letter-spacing:-.04em; font-weight:600; font-size:clamp(2rem,5vw,2.6rem); margin:0 0 28px; color:var(--ink); }
+
+.modal-form { display:flex; flex-direction:column; gap:14px; }
+.form-group { display:flex; flex-direction:column; }
+
+.form-input { font-family:"DM Sans",sans-serif; font-size:.95rem; color:var(--ink); background:var(--paper); border:1px solid var(--line); padding:15px 16px; width:100%; outline:none; transition:.2s ease; }
+.form-input::placeholder { color:#9a9384; }
+.form-input:focus { border-color:var(--gold); background:#fffdf7; }
+.form-input:disabled { opacity:.6; cursor:not-allowed; }
+
+.modal-form .form-button { justify-content:center; margin-top:6px; width:100%; background:var(--ink); border-color:var(--ink); color:#fffdf7; }
+.modal-form .form-button:hover,
+.modal-form .form-button:focus-visible { background:#e7d9bb; border-color:#e7d9bb; color:var(--ink); }
+.modal-form .form-button:disabled { opacity:.6; cursor:not-allowed; }
+.modal-form .form-button:disabled:hover { background:var(--ink); color:#fffdf7; }
+
+.modal-form .modal-error { margin:0; }
 
 @media (max-width:650px) {
-  .error-code { font-size:clamp(4.2rem,22vw,7rem); }
+  .admin-login-card { padding:32px 22px; }
 }
-
