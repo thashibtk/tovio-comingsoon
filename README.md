@@ -1,22 +1,21 @@
-# TOVIO — Coming Soon (Next.js)
+# TOVIO Worker Connect
 
-Converted from the original static HTML page 1:1 — same styling, fonts,
-scroll-reveal animation, background texture, and dynamic copyright year.
-
-## Structure
-- `app/layout.tsx` — root layout, page metadata + `theme-color`
-- `app/page.tsx` — the page markup (client component for the year + scroll-reveal `IntersectionObserver`)
-- `app/globals.css` — all original CSS, unchanged (including the Google Fonts `@import`)
+Bilingual (English / Hindi) website for finding construction workers and labour agents in Kerala. Workers and employers sign in with Google or email. The app uses Next.js and Supabase.
 
 ## Run locally
+
 ```bash
 npm install
+```
+
+Copy `.env.example` to `.env.local` and fill in the values, then:
+
+```bash
 npm run dev
 ```
-Then open http://localhost:3000
 
-## Build for production
-```bash
-npm run build
-npm start
-```
+Open http://localhost:3000
+
+## What you still configure
+
+The code is in this repo. Sign-in, the database, photo uploads, and the admin export only work after the Supabase and Google steps in the project notes are done. Run `supabase/schema.sql` in the Supabase SQL editor before creating accounts.
