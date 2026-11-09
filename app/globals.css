@@ -1082,8 +1082,10 @@ a.text-button { text-decoration: none; display: inline-block; }
 .enquiry-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
 .person-main { display: grid; gap: 2px; }
 .person-main a { color: #8d744c; }
-.status-field { display: grid; gap: 6px; max-width: 220px; }
+.enquiry-footer { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.status-field { display: grid; gap: 6px; max-width: 220px; flex: 1; min-width: 150px; }
 .status-field .form-input { border-radius: 12px; }
+.enquiry-call-btn { height: 48px; padding: 0 20px; font-weight: 600; gap: 8px; align-self: flex-end; text-decoration: none; }
 .pill-new { background: rgba(182, 146, 89, .22); }
 .pill-viewed { background: rgba(90, 122, 158, .16); }
 .pill-accepted { background: rgba(76, 122, 72, .16); }

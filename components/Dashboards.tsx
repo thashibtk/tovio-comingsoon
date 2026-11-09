@@ -8,6 +8,7 @@ import WorkerForm from "./WorkerForm";
 import { districtName } from "@/lib/data";
 import { useI18n } from "@/lib/i18n";
 import { availabilityLabel, categoryName, designationLabel, skillLabel, statusLabel, workLabel } from "@/lib/labels";
+import { phoneHref } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
 import type {
   AccountType,
@@ -366,6 +367,12 @@ function EnquiryCards({
     <div className="card-list">
       {enquiries.map((enquiry) => {
         const category = categories.find((item) => item.id === enquiry.category_id);
+        const rawPhone = enquiry.employer_phone?.trim();
+        const callHref =
+          onStatus && rawPhone
+            ? phoneHref(rawPhone) || `tel:${rawPhone.replace(/\s+/g, "")}`
+            : null;
+
         return (
           <article key={enquiry.id} className="enquiry-card">
             <div className="enquiry-top">
@@ -384,21 +391,47 @@ function EnquiryCards({
               {enquiry.work_type ? ` · ${workLabel(t, enquiry.work_type)}` : ""}
             </p>
             {enquiry.message ? <p>{enquiry.message}</p> : null}
-            {onStatus ? (
-              <label className="status-field">
-                <span>{t.dashboard.status}</span>
-                <select
-                  className="form-input"
-                  value={enquiry.status}
-                  onChange={(event) => onStatus(enquiry.id, event.target.value)}
-                >
-                  {STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {statusLabel(t, status)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+            {onStatus || callHref ? (
+              <div className="enquiry-footer">
+                {onStatus ? (
+                  <label className="status-field">
+                    <span>{t.dashboard.status}</span>
+                    <select
+                      className="form-input"
+                      value={enquiry.status}
+                      onChange={(event) => onStatus(enquiry.id, event.target.value)}
+                    >
+                      {STATUSES.map((status) => (
+                        <option key={status} value={status}>
+                          {statusLabel(t, status)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                {callHref ? (
+                  <a
+                    className="btn btn-dark enquiry-call-btn"
+                    href={callHref}
+                    title={`${t.profileView.call}: ${enquiry.employer_phone}`}
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                    <span>{t.profileView.call}</span>
+                  </a>
+                ) : null}
+              </div>
             ) : null}
           </article>
         );
