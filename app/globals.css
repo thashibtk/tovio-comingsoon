@@ -1135,14 +1135,138 @@ legend { padding: 0 6px; }
   .topbar-inner { position: relative; }
   .find-layout, .profile-layout, .path-grid, .form-row, .count-row, .home-promises, .home-path-grid, .home-step-grid, .flow-grid { grid-template-columns: 1fr; }
   .filters { position: static; }
-  .section { padding: 48px 0; }
-  .home-promises, .home-path-grid, .home-step-grid { gap: 22px; }
+  .section { padding: 64px 0; }
+  .wrap,
+  .story-page,
+  .setup-page,
+  .page-hero,
+  .topbar-inner {
+    width: min(100% - 48px, 1120px);
+  }
+  .home-paths h2,
+  .home-steps h2,
+  .home-cover h2 {
+    font-size: clamp(1.7rem, 7vw, 2.2rem);
+    line-height: 1.15;
+    max-width: 12em;
+  }
+  .section-label { margin-bottom: 14px; }
+  .home-path-grid,
+  .home-step-grid,
+  .home-promises {
+    gap: 0;
+    margin-top: 32px;
+    padding-top: 4px;
+  }
+  .home-path,
+  .home-step,
+  .home-promises > li {
+    padding: 28px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .home-path:last-child,
+  .home-step:last-child,
+  .home-promises > li:last-child {
+    border-bottom: 0;
+    padding-bottom: 8px;
+  }
+  .home-path,
+  .home-step {
+    gap: 12px;
+  }
+  .home-path p,
+  .home-step p,
+  .home-promises p,
+  .flow-panel-head p:last-child {
+    max-width: none;
+  }
+  .home-path strong,
+  .home-step strong {
+    font-size: 1.35rem;
+    line-height: 1.25;
+  }
+  .home-promise-label { margin-bottom: 12px; }
+  .home-path-action { margin-top: 4px; }
+  .home-cover-actions,
+  .about-actions,
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .home-cover-actions .btn,
+  .about-actions .btn,
+  .hero-actions .btn,
+  .flow-panel .btn {
+    width: 100%;
+  }
+  .flow-panel {
+    padding: 22px;
+    gap: 20px;
+    border-radius: 18px;
+  }
+  .flow-steps { gap: 0; }
+  .flow-steps li {
+    padding: 18px 0 0;
+    gap: 10px;
+  }
+  .about-point {
+    gap: 14px;
+    padding: 26px 0;
+  }
+  .setup-page { margin: 28px auto 64px; }
+  .setup-intro { margin-bottom: 24px; }
+  .setup-intro h1 {
+    font-size: clamp(2rem, 9vw, 2.6rem);
+    line-height: 1.1;
+  }
+  .lede {
+    font-size: 1rem;
+    line-height: 1.65;
+    margin-top: 12px;
+  }
   .home-paths,
   .home-steps,
   .home-cover,
   .home-hero-rise {
     animation: none;
   }
+}
+
+@media (max-width: 480px) {
+  .wrap,
+  .story-page,
+  .setup-page,
+  .page-hero,
+  .topbar-inner {
+    width: min(100% - 40px, 1120px);
+  }
+  .section { padding: 52px 0; }
+  .home-path,
+  .home-step,
+  .home-promises > li {
+    padding: 30px 0;
+  }
+  .home-path-label,
+  .home-promise-label {
+    gap: 12px;
+    letter-spacing: .11em;
+  }
+  .home-step-top { margin-bottom: 4px; }
+  .flow-panel-head {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .flow-steps li {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "icon num"
+      "text text";
+  }
+  .flow-step-icon { grid-area: icon; }
+  .flow-step-num { grid-area: num; margin-top: 8px; justify-self: end; }
+  .flow-steps li p { grid-area: text; margin-top: 10px; }
 }
 
 .otp-input { letter-spacing: .35em; font-size: 1.35rem; text-align: center; }
