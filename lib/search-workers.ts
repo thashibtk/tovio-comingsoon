@@ -1,16 +1,14 @@
-import { DISTRICTS } from "@/lib/data";
+import { DISTRICTS, townInDistrict } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import type { PublicSkill, PublicWorker } from "@/lib/types";
 
 const PAGE_SIZE = 12;
-const AVAILABILITY = new Set(["available", "busy", "unavailable"]);
 const PROFILE_TYPES = new Set(["individual", "agent"]);
 
 export type WorkerSearchFilters = {
-  q?: string;
   district?: string;
+  town?: string;
   category?: string;
-  availability?: string;
   type?: string;
   min?: number;
   offset?: number;
@@ -23,15 +21,10 @@ export async function searchPublicWorkers(filters: WorkerSearchFilters) {
   const offset = clamp(filters.offset ?? 0, 0, 5000);
   const min = clamp(filters.min ?? 0, 0, 999);
   const district = DISTRICTS.some((item) => item.id === filters.district) ? filters.district : "";
-  const availability = AVAILABILITY.has(filters.availability ?? "") ? filters.availability : "";
+  const town =
+    district && filters.town && townInDistrict(district, filters.town.trim()) ? filters.town.trim() : "";
   const profileType = PROFILE_TYPES.has(filters.type ?? "") ? filters.type : "";
   const category = /^[0-9a-f-]{36}$/i.test(filters.category ?? "") ? filters.category : "";
-  const keyword = (filters.q ?? "")
-    .trim()
-    .slice(0, 80)
-    .replace(/[%_,.()"'\\]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 
   let allowedIds: string[] | null = null;
   if (category || min > 0) {
@@ -41,10 +34,14 @@ export async function searchPublicWorkers(filters: WorkerSearchFilters) {
 
   let query = supabase.from("worker_public").select("*");
   if (allowedIds) query = query.in("id", allowedIds);
-  if (district) query = query.eq("district", district);
-  if (availability) query = query.eq("availability", availability);
+  if (town) {
+    // Town is on the home place only.
+    query = query.eq("district", district).eq("town", town);
+  } else if (district) {
+    // Home district or listed under preferred districts.
+    query = query.or(`district.eq.${district},preferred_districts.cs.{${district}}`);
+  }
   if (profileType) query = query.eq("profile_type", profileType);
-  if (keyword) query = query.or(`name.ilike."%${keyword}%",town.ilike."%${keyword}%"`);
 
   const { data, error } = await query
     .order("availability", { ascending: true })

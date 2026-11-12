@@ -2,9 +2,9 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DISTRICTS, safePath } from "@/lib/data";
+import { DISTRICTS, safePath, townInDistrict, townsForDistrict } from "@/lib/data";
 import { useI18n } from "@/lib/i18n";
-import { categoryName, skillLabel } from "@/lib/labels";
+import { categoryName, groupedCategories, skillLabel } from "@/lib/labels";
 import { isMobileNumber, mobileDigits } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
 import type { AccountType, Availability, Category, WorkerProfile, WorkerSkill, WorkType } from "@/lib/types";
@@ -35,15 +35,16 @@ export default function WorkerForm({
   const activeCategories = categories.filter(
     (category) => category.active !== false || skills.some((skill) => skill.category_id === category.id)
   );
+  const tradeGroups = useMemo(() => groupedCategories(activeCategories, lang), [activeCategories, lang]);
   const [name, setName] = useState(worker?.name ?? "");
   const email = defaultEmail || worker?.email || "";
   const [phone, setPhone] = useState(worker?.phone ?? "");
   const [district, setDistrict] = useState(worker?.district ?? "");
-  const [town, setTown] = useState(worker?.town ?? "");
+  const [town, setTown] = useState(
+    worker?.district && worker.town && townInDistrict(worker.district, worker.town) ? worker.town : worker?.town ?? ""
+  );
   const [skillLevel, setSkillLevel] = useState(worker?.skill_level ?? "");
   const [experience, setExperience] = useState(worker?.experience ?? "");
-  const [availability, setAvailability] = useState<Availability>(worker?.availability ?? "available");
-  const [availableFrom, setAvailableFrom] = useState(worker?.available_from ?? "");
   const [workType, setWorkType] = useState<WorkType>(worker?.work_type ?? "any");
   const [preferred, setPreferred] = useState<string[]>(
     (worker?.preferred_districts ?? []).filter((id) => id !== (worker?.district ?? ""))
@@ -80,6 +81,7 @@ export default function WorkerForm({
   function chooseDistrict(next: string) {
     setDistrict(next);
     setPreferred((current) => current.filter((id) => id !== next));
+    setTown((current) => (next && townInDistrict(next, current) ? current : ""));
   }
 
   function togglePreferred(id: string) {
@@ -146,8 +148,8 @@ export default function WorkerForm({
         town: town.trim(),
         skill_level: isAgent ? null : skillLevel || null,
         experience: experience.trim() || null,
-        availability,
-        available_from: availableFrom || null,
+        availability: "available" as Availability,
+        available_from: null,
         work_type: workType,
         preferred_districts: preferred.filter((id) => id !== district),
         description: description.trim() || null,
@@ -180,11 +182,7 @@ export default function WorkerForm({
         category_id: categoryId,
         skill_level: (isAgent ? selected[categoryId].level : skillLevel) || null,
         total_count: isAgent ? Number(selected[categoryId].total) : 1,
-        available_count: isAgent
-          ? Number(selected[categoryId].available)
-          : availability === "available"
-            ? 1
-            : 0,
+        available_count: isAgent ? Number(selected[categoryId].available) : 1,
       }));
       const { error: skillError } = await supabase.from("worker_skills").insert(rows);
       if (skillError) throw skillError;
@@ -214,10 +212,7 @@ export default function WorkerForm({
   return (
     <form className="setup" onSubmit={onSubmit}>
       <section className="setup-block">
-        <header>
-          <p className="setup-kicker">1</p>
-          <h2>{t.fields.sectionYou}</h2>
-        </header>
+        <SetupHeader step="1" title={t.fields.sectionYou} icon="you" />
         <div className="setup-grid">
           <label>
             <span>{isAgent ? t.fields.agentName : t.fields.name}</span>
@@ -258,10 +253,7 @@ export default function WorkerForm({
       </section>
 
       <section className="setup-block">
-        <header>
-          <p className="setup-kicker">2</p>
-          <h2>{t.fields.sectionPlace}</h2>
-        </header>
+        <SetupHeader step="2" title={t.fields.sectionPlace} icon="place" />
         <div className="setup-grid">
           <label>
             <span>{t.fields.district}</span>
@@ -276,31 +268,49 @@ export default function WorkerForm({
           </label>
           <label>
             <span>{t.fields.town}</span>
-            <input className="form-input" value={town} onChange={(event) => setTown(event.target.value)} required />
+            <select
+              className="form-input"
+              value={town}
+              onChange={(event) => setTown(event.target.value)}
+              required
+              disabled={!district}
+            >
+              <option value="">{district ? t.fields.townPick : t.fields.townNeedDistrict}</option>
+              {townsForDistrict(district).map((item) => (
+                <option key={item.en} value={item.en}>
+                  {item[lang]}
+                </option>
+              ))}
+              {town && district && !townInDistrict(district, town) ? <option value={town}>{town}</option> : null}
+            </select>
           </label>
         </div>
       </section>
 
       <section className="setup-block">
-        <header>
-          <p className="setup-kicker">3</p>
-          <h2>{t.fields.sectionTrades}</h2>
-        </header>
-        <div className="trade-cloud">
-          {activeCategories.map((category) => {
-            const checked = Boolean(selected[category.id]);
-            return (
-              <button
-                key={category.id}
-                className={checked ? "trade-chip on" : "trade-chip"}
-                type="button"
-                aria-pressed={checked}
-                onClick={() => toggleCategory(category.id)}
-              >
-                {categoryName(category, lang)}
-              </button>
-            );
-          })}
+        <SetupHeader step="3" title={t.fields.sectionTrades} icon="trades" />
+        <div className="trade-groups">
+          {tradeGroups.map((group) => (
+            <div key={group.label} className="trade-group">
+              <h3>{group.label}</h3>
+              <div className="trade-cloud">
+                {group.items.map((category) => {
+                  const checked = Boolean(selected[category.id]);
+                  return (
+                    <button
+                      key={category.id}
+                      className={checked ? "trade-chip on" : "trade-chip"}
+                      type="button"
+                      aria-pressed={checked}
+                      onClick={() => toggleCategory(category.id)}
+                    >
+                      {categoryName(category, lang)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
         {isAgent && selectedIds.length > 0 ? (
           <div className="agent-counts">
@@ -367,10 +377,7 @@ export default function WorkerForm({
       </section>
 
       <section className="setup-block">
-        <header>
-          <p className="setup-kicker">4</p>
-          <h2>{t.fields.sectionWhen}</h2>
-        </header>
+        <SetupHeader step="4" title={t.fields.sectionWhen} icon="work" />
         <div className="setup-grid">
           {isAgent ? null : (
             <label>
@@ -386,29 +393,6 @@ export default function WorkerForm({
               </select>
             </label>
           )}
-          <label>
-            <span>{t.fields.availability}</span>
-            <select
-              className="form-input"
-              value={availability}
-              onChange={(event) => setAvailability(event.target.value as Availability)}
-            >
-              <option value="available">{t.availability.available}</option>
-              <option value="busy">{t.availability.busy}</option>
-              <option value="unavailable">{t.availability.unavailable}</option>
-            </select>
-          </label>
-          <label>
-            <span>
-              {t.fields.availableFrom} <em>({t.fields.optional})</em>
-            </span>
-            <input
-              className="form-input"
-              type="date"
-              value={availableFrom ?? ""}
-              onChange={(event) => setAvailableFrom(event.target.value)}
-            />
-          </label>
           <label>
             <span>{t.fields.workType}</span>
             <select className="form-input" value={workType} onChange={(event) => setWorkType(event.target.value as WorkType)}>
@@ -434,10 +418,7 @@ export default function WorkerForm({
       </section>
 
       <section className="setup-block">
-        <header>
-          <p className="setup-kicker">5</p>
-          <h2>{t.fields.sectionMore}</h2>
-        </header>
+        <SetupHeader step="5" title={t.fields.sectionMore} icon="more" />
         <div>
           <span className="setup-label">
             {t.fields.preferred} <em>({t.fields.optional})</em>
@@ -478,6 +459,72 @@ export default function WorkerForm({
         </button>
       </div>
     </form>
+  );
+}
+
+function SetupHeader({
+  step,
+  title,
+  icon,
+}: {
+  step: string;
+  title: string;
+  icon: "you" | "place" | "trades" | "work" | "more";
+}) {
+  return (
+    <header className="setup-heading">
+      <span className="setup-icon" aria-hidden="true">
+        <SetupIcon kind={icon} />
+      </span>
+      <div>
+        <p className="setup-kicker">{step}</p>
+        <h2>{title}</h2>
+      </div>
+    </header>
+  );
+}
+
+function SetupIcon({ kind }: { kind: "you" | "place" | "trades" | "work" | "more" }) {
+  if (kind === "you") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="8" r="3.2" />
+        <path d="M5 19.5c1.2-3.2 3.6-4.8 7-4.8s5.8 1.6 7 4.8" />
+      </svg>
+    );
+  }
+  if (kind === "place") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 21s6.5-5.2 6.5-11A6.5 6.5 0 0 0 5.5 10c0 5.8 6.5 11 6.5 11z" />
+        <circle cx="12" cy="10" r="2.2" />
+      </svg>
+    );
+  }
+  if (kind === "trades") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14.5 6.5l3 3L8 19H5v-3L14.5 6.5z" />
+        <path d="M12.5 8.5l3 3" />
+        <path d="M16 4l4 4" />
+      </svg>
+    );
+  }
+  if (kind === "work") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3.5" y="7" width="17" height="12.5" rx="2" />
+        <path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8V7" />
+        <path d="M3.5 12h17" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 4h7l4 4v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+      <path d="M14 4v4h4" />
+      <path d="M8.5 12h7M8.5 15.5h7" />
+    </svg>
   );
 }
 

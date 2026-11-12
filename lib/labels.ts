@@ -57,3 +57,23 @@ export function formatDistricts(ids: string[] | null | undefined, lang: Lang) {
 export function categoryById(categories: Category[], id: string) {
   return categories.find((category) => category.id === id);
 }
+
+export function groupLabel(category: Category, lang: Lang) {
+  if (lang === "hi") return category.group_hi || category.group_en || category.group_slug || "";
+  return category.group_en || category.group_slug || "";
+}
+
+export function groupedCategories(categories: Category[], lang: Lang) {
+  const order: string[] = [];
+  const buckets = new Map<string, { label: string; items: Category[] }>();
+  for (const category of categories) {
+    const key = category.group_slug || category.group_en || "other";
+    const label = groupLabel(category, lang) || (lang === "hi" ? "अन्य" : "Other");
+    if (!buckets.has(key)) {
+      buckets.set(key, { label, items: [] });
+      order.push(key);
+    }
+    buckets.get(key)!.items.push(category);
+  }
+  return order.map((key) => buckets.get(key)!);
+}

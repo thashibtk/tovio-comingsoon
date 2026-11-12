@@ -12,10 +12,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   try {
     const result = await searchPublicWorkers({
-      q: searchParams.get("q") ?? "",
       district: searchParams.get("district") ?? "",
+      town: searchParams.get("town") ?? "",
       category: searchParams.get("category") ?? "",
-      availability: searchParams.get("availability") ?? "",
       type: searchParams.get("type") ?? "",
       min: Number(searchParams.get("min") || 0),
       offset: Number(searchParams.get("offset") || 0),

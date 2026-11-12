@@ -1,26 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { DISTRICTS } from "@/lib/data";
-import { useI18n } from "@/lib/i18n";
-import { availabilityLabel, categoryName, skillLabel } from "@/lib/labels";
-import type { Category, PublicSkill, PublicWorker } from "@/lib/types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ContactReveal from "@/components/ContactReveal";
+import { DISTRICTS, townsForDistrict } from "@/lib/data";
+import { useI18n } from "@/lib/i18n";
+import { availabilityLabel, categoryName, groupedCategories, skillLabel } from "@/lib/labels";
+import type { Category, PublicSkill, PublicWorker } from "@/lib/types";
 
 type WorkerCard = PublicWorker & { skills: PublicSkill[] };
 
 function isAbort(error: unknown) {
   return typeof error === "object" && error !== null && "name" in error && (error as { name: string }).name === "AbortError";
 }
-
-const FILTERS = {
-  district: "",
-  category: "",
-  availability: "",
-  profileType: "",
-  minimum: "",
-};
 
 export default function FindWorkers({
   categories,
@@ -32,13 +24,11 @@ export default function FindWorkers({
   signedIn: boolean;
 }) {
   const { t, lang } = useI18n();
-  const [keyword, setKeyword] = useState("");
-  const [query, setQuery] = useState("");
-  const [district, setDistrict] = useState(FILTERS.district);
-  const [category, setCategory] = useState(FILTERS.category);
-  const [availability, setAvailability] = useState(FILTERS.availability);
-  const [profileType, setProfileType] = useState(FILTERS.profileType);
-  const [minimum, setMinimum] = useState(FILTERS.minimum);
+  const [district, setDistrict] = useState("");
+  const [town, setTown] = useState("");
+  const [category, setCategory] = useState("");
+  const [profileType, setProfileType] = useState("");
+  const [minimum, setMinimum] = useState("");
   const [workers, setWorkers] = useState<WorkerCard[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(enabled ? "loading" : "error");
   const [hasMore, setHasMore] = useState(false);
@@ -46,19 +36,15 @@ export default function FindWorkers({
   const offsetRef = useRef(0);
   const loadingMoreRef = useRef(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setQuery(keyword.trim()), 300);
-    return () => window.clearTimeout(timer);
-  }, [keyword]);
+  const towns = useMemo(() => townsForDistrict(district), [district]);
+  const categoryGroups = useMemo(() => groupedCategories(categories, lang), [categories, lang]);
 
   const loadPage = useCallback(
     async (offset: number, signal?: AbortSignal) => {
       const params = new URLSearchParams();
-      if (query) params.set("q", query);
       if (district) params.set("district", district);
+      if (town) params.set("town", town);
       if (category) params.set("category", category);
-      if (availability) params.set("availability", availability);
       if (profileType) params.set("type", profileType);
       if (Number(minimum) > 0) params.set("min", String(Number(minimum)));
       params.set("offset", String(offset));
@@ -66,7 +52,7 @@ export default function FindWorkers({
       if (!response.ok) throw new Error("load");
       return (await response.json()) as { workers: WorkerCard[]; hasMore: boolean; error?: boolean };
     },
-    [availability, category, district, minimum, profileType, query]
+    [category, district, minimum, profileType, town]
   );
 
   useEffect(() => {
@@ -126,18 +112,19 @@ export default function FindWorkers({
     return () => observer.disconnect();
   }, [hasMore, loadMore, status, workers.length]);
 
+  function chooseDistrict(next: string) {
+    setDistrict(next);
+    setTown("");
+  }
+
   const countLabel = `${workers.length}${hasMore ? "+" : ""} ${t.find.results}`;
 
   return (
     <div className="find-layout">
       <form className="find-filters" onSubmit={(event) => event.preventDefault()}>
         <label>
-          <span>{t.find.keyword}</span>
-          <input className="form-input" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
-        </label>
-        <label>
           <span>{t.find.district}</span>
-          <select className="form-input" value={district} onChange={(event) => setDistrict(event.target.value)}>
+          <select className="form-input" value={district} onChange={(event) => chooseDistrict(event.target.value)}>
             <option value="">{t.find.any}</option>
             {DISTRICTS.map((item) => (
               <option key={item.id} value={item.id}>
@@ -147,23 +134,34 @@ export default function FindWorkers({
           </select>
         </label>
         <label>
-          <span>{t.find.category}</span>
-          <select className="form-input" value={category} onChange={(event) => setCategory(event.target.value)}>
-            <option value="">{t.find.any}</option>
-            {categories.map((item) => (
-              <option key={item.id} value={item.id}>
-                {categoryName(item, lang)}
+          <span>{t.find.town}</span>
+          <select
+            className="form-input"
+            value={town}
+            onChange={(event) => setTown(event.target.value)}
+            disabled={!district}
+          >
+            <option value="">{district ? t.find.any : t.fields.townNeedDistrict}</option>
+            {towns.map((item) => (
+              <option key={item.en} value={item.en}>
+                {item[lang]}
               </option>
             ))}
           </select>
         </label>
         <label>
-          <span>{t.find.availability}</span>
-          <select className="form-input" value={availability} onChange={(event) => setAvailability(event.target.value)}>
+          <span>{t.find.category}</span>
+          <select className="form-input" value={category} onChange={(event) => setCategory(event.target.value)}>
             <option value="">{t.find.any}</option>
-            <option value="available">{t.availability.available}</option>
-            <option value="busy">{t.availability.busy}</option>
-            <option value="unavailable">{t.availability.unavailable}</option>
+            {categoryGroups.map((group) => (
+              <optgroup key={group.label} label={group.label}>
+                {group.items.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {categoryName(item, lang)}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
           </select>
         </label>
         <label>

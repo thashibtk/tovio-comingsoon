@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
-import PageHero from "@/components/PageHero";
 import SiteFrame from "@/components/SiteFrame";
 import { getDict } from "@/lib/locale";
 
@@ -13,11 +12,13 @@ export default function ContactPage() {
   const t = getDict();
   return (
     <SiteFrame>
-      <PageHero kicker={t.product} title={t.contact.title} lede={t.contact.lead} />
-      <section className="section">
-        <div className="wrap narrow">
-          <ContactForm />
-        </div>
+      <section className="setup-page contact-page">
+        <header className="setup-intro">
+          <p className="section-label">{t.product}</p>
+          <h1>{t.contact.title}</h1>
+          <p>{t.contact.lead}</p>
+        </header>
+        <ContactForm />
       </section>
     </SiteFrame>
   );

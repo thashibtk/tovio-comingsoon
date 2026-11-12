@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DISTRICTS, safePath } from "@/lib/data";
+import { DISTRICTS, safePath, townInDistrict, townsForDistrict } from "@/lib/data";
 import { useI18n } from "@/lib/i18n";
 import { isMobileNumber, mobileDigits } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
@@ -28,7 +28,11 @@ export default function EmployerForm({
   const [company, setCompany] = useState(employer?.company ?? "");
   const [phone, setPhone] = useState(employer?.phone ?? "");
   const [district, setDistrict] = useState(employer?.district ?? "");
-  const [town, setTown] = useState(employer?.town ?? "");
+  const [town, setTown] = useState(
+    employer?.district && employer.town && townInDistrict(employer.district, employer.town)
+      ? employer.town
+      : employer?.town ?? ""
+  );
   const [promo, setPromo] = useState(employer?.promo_consent ?? false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -147,7 +151,16 @@ export default function EmployerForm({
         <div className="setup-grid">
           <label>
             <span>{t.fields.district}</span>
-            <select className="form-input" value={district} onChange={(event) => setDistrict(event.target.value)} required>
+            <select
+              className="form-input"
+              value={district}
+              onChange={(event) => {
+                const next = event.target.value;
+                setDistrict(next);
+                setTown((current) => (next && townInDistrict(next, current) ? current : ""));
+              }}
+              required
+            >
               <option value="">{t.common.select}</option>
               {DISTRICTS.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -158,7 +171,21 @@ export default function EmployerForm({
           </label>
           <label>
             <span>{t.fields.town}</span>
-            <input className="form-input" value={town} onChange={(event) => setTown(event.target.value)} required />
+            <select
+              className="form-input"
+              value={town}
+              onChange={(event) => setTown(event.target.value)}
+              required
+              disabled={!district}
+            >
+              <option value="">{district ? t.fields.townPick : t.fields.townNeedDistrict}</option>
+              {townsForDistrict(district).map((item) => (
+                <option key={item.en} value={item.en}>
+                  {item[lang]}
+                </option>
+              ))}
+              {town && district && !townInDistrict(district, town) ? <option value={town}>{town}</option> : null}
+            </select>
           </label>
         </div>
         <label className="consent">

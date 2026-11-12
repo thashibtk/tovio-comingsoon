@@ -10,6 +10,9 @@ export type Category = {
   name_hi: string;
   active?: boolean;
   sort_order?: number;
+  group_slug?: string | null;
+  group_en?: string | null;
+  group_hi?: string | null;
 };
 
 export type WorkerSkill = {

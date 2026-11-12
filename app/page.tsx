@@ -1,32 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFrame from "@/components/SiteFrame";
-import { FALLBACK_CATEGORIES } from "@/lib/data";
-import { getDict, getLang } from "@/lib/locale";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import { getDict } from "@/lib/locale";
 
 export function generateMetadata(): Metadata {
   const t = getDict();
   return { title: t.meta.homeTitle, description: t.meta.homeDescription };
 }
 
-export default async function HomePage() {
+export default function HomePage() {
   const t = getDict();
-  const lang = getLang();
-  let categories: { name_en: string; name_hi: string }[] = FALLBACK_CATEGORIES.map((item) => ({
-    name_en: item.en,
-    name_hi: item.hi,
-  }));
-
-  if (isSupabaseConfigured()) {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("worker_categories")
-      .select("name_en, name_hi")
-      .eq("active", true)
-      .order("sort_order");
-    if (data?.length) categories = data;
-  }
 
   return (
     <SiteFrame>
@@ -74,18 +57,33 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section home-cover" aria-labelledby="cover-title">
         <div className="wrap">
-          <h2>{t.home.categoriesTitle}</h2>
-          <p className="lede">{t.home.categoriesNote}</p>
-          <ul className="category-cloud">
-            {categories.map((category) => (
-              <li key={category.name_en}>{lang === "hi" ? category.name_hi : category.name_en}</li>
-            ))}
+          <p className="section-label">04</p>
+          <h2 id="cover-title">{t.home.coverTitle}</h2>
+          <p className="lede">{t.home.coverBody}</p>
+          <ul className="home-promises">
+            <li>
+              <span className="home-promise-label">{t.home.cover1Label}</span>
+              <p>{t.home.cover1Body}</p>
+            </li>
+            <li>
+              <span className="home-promise-label">{t.home.cover2Label}</span>
+              <p>{t.home.cover2Body}</p>
+            </li>
+            <li>
+              <span className="home-promise-label">{t.home.cover3Label}</span>
+              <p>{t.home.cover3Body}</p>
+            </li>
           </ul>
-          <Link className="btn btn-dark" href="/find">
-            {t.nav.find}
-          </Link>
+          <div className="home-cover-actions">
+            <Link className="btn btn-dark" href="/find">
+              {t.nav.find}
+            </Link>
+            <Link className="btn btn-line-dark" href="/register">
+              {t.nav.register}
+            </Link>
+          </div>
         </div>
       </section>
     </SiteFrame>
