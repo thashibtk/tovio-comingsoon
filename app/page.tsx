@@ -9,6 +9,26 @@ export function generateMetadata(): Metadata {
   return { title: t.meta.homeTitle, description: t.meta.homeDescription };
 }
 
+function Arrow() {
+  return (
+    <svg
+      className="hc-arrow"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const t = getDict();
 
@@ -56,94 +76,106 @@ export default function HomePage() {
 
   return (
     <SiteFrame>
+      {/* Hero: one primary action, one quiet text link */}
       <section className="hero hero-home" aria-labelledby="hero-title">
         <div className="grain" aria-hidden="true" />
         <div className="hero-content home-hero-rise">
           <p className="eyebrow">{t.home.eyebrow}</p>
           <h1 id="hero-title">{t.home.title}</h1>
           <p className="intro">{t.home.intro}</p>
-          <div className="hero-actions">
+          <div className="hero-actions hc-hero-actions">
             <Link className="btn btn-gold" href="/find">
               {t.nav.find}
             </Link>
-            <Link className="btn btn-line" href="/register">
+            <Link className="hc-textlink" href="/register">
               {t.nav.register}
+              <Arrow />
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="section home-paths" aria-labelledby="paths-title">
+      {/* Paths: whole card is the link, no repeated button text */}
+      <section className="section home-cards" aria-labelledby="paths-title">
         <div className="wrap">
-          <p className="section-label">01</p>
-          <h2 id="paths-title">{t.home.pathsTitle}</h2>
-          <p className="lede">{t.home.pathsBody}</p>
-          <div className="home-path-grid">
+          <header className="hc-head">
+            <p className="section-label">01</p>
+            <h2 id="paths-title">{t.home.pathsTitle}</h2>
+            <p className="lede">{t.home.pathsBody}</p>
+          </header>
+
+          <div className="hc-grid hc-grid-3">
             {paths.map((path) => (
-              <Link key={path.href} className="home-path" href={path.href}>
-                <span className="home-path-label">
-                  <span className="home-path-icon" aria-hidden="true">
-                    <SiteIcon kind={path.icon} />
-                  </span>
-                  {path.label}
+              <Link
+                key={path.href}
+                href={path.href}
+                className="hc-card hc-card-link"
+                aria-label={`${path.label}: ${path.title}`}
+              >
+                <span className="hc-icon" aria-hidden="true">
+                  <SiteIcon kind={path.icon} />
                 </span>
-                <strong>{path.title}</strong>
-                <p>{path.body}</p>
-                <span className="home-path-action">{t.home.pathAction}</span>
+                <span className="hc-tag">{path.label}</span>
+                <strong className="hc-title">{path.title}</strong>
+                <p className="hc-body">{path.body}</p>
+                <span className="hc-go" aria-hidden="true">
+                  <Arrow />
+                </span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="section section-tint home-steps" aria-labelledby="steps-title">
+      {/* Steps: numbered cards */}
+      <section
+        className="section section-tint home-cards"
+        aria-labelledby="steps-title"
+      >
         <div className="wrap">
-          <p className="section-label">02</p>
-          <h2 id="steps-title">{t.home.stepsTitle}</h2>
-          <p className="lede">{t.home.stepsBody}</p>
-          <ol className="home-step-grid">
+          <header className="hc-head">
+            <p className="section-label">02</p>
+            <h2 id="steps-title">{t.home.stepsTitle}</h2>
+            <p className="lede">{t.home.stepsBody}</p>
+          </header>
+
+          <ol className="hc-grid hc-grid-3 hc-steps">
             {steps.map((step, index) => (
-              <li key={step.label} className="home-step">
-                <span className="home-step-top">
-                  <span className="home-step-icon" aria-hidden="true">
-                    <SiteIcon kind={step.icon} />
-                  </span>
-                  <span className="home-step-num">0{index + 1}</span>
+              <li key={step.label} className="hc-card hc-step">
+                <span className="hc-step-num" aria-hidden="true">
+                  0{index + 1}
                 </span>
-                <strong>{step.label}</strong>
-                <p>{step.body}</p>
+                <span className="hc-icon" aria-hidden="true">
+                  <SiteIcon kind={step.icon} />
+                </span>
+                <strong className="hc-title">{step.label}</strong>
+                <p className="hc-body">{step.body}</p>
               </li>
             ))}
           </ol>
         </div>
       </section>
 
-      <section className="section home-cover" aria-labelledby="cover-title">
+      {/* Coverage: info cards only, no buttons */}
+      <section className="section home-cards" aria-labelledby="cover-title">
         <div className="wrap">
-          <p className="section-label">03</p>
-          <h2 id="cover-title">{t.home.coverTitle}</h2>
-          <p className="lede">{t.home.coverBody}</p>
-          <ul className="home-promises">
+          <header className="hc-head">
+            <p className="section-label">03</p>
+            <h2 id="cover-title">{t.home.coverTitle}</h2>
+            <p className="lede">{t.home.coverBody}</p>
+          </header>
+
+          <ul className="hc-grid hc-grid-3 hc-promises">
             {promises.map((item) => (
-              <li key={item.label}>
-                <span className="home-promise-label">
-                  <span className="home-promise-icon" aria-hidden="true">
-                    <SiteIcon kind={item.icon} />
-                  </span>
-                  {item.label}
+              <li key={item.label} className="hc-card hc-promise">
+                <span className="hc-icon hc-icon-soft" aria-hidden="true">
+                  <SiteIcon kind={item.icon} />
                 </span>
-                <p>{item.body}</p>
+                <strong className="hc-title">{item.label}</strong>
+                <p className="hc-body">{item.body}</p>
               </li>
             ))}
           </ul>
-          <div className="home-cover-actions">
-            <Link className="btn btn-dark" href="/find">
-              {t.nav.find}
-            </Link>
-            <Link className="btn btn-line-dark" href="/register">
-              {t.nav.register}
-            </Link>
-          </div>
         </div>
       </section>
     </SiteFrame>

@@ -1755,3 +1755,181 @@ a.text-button { text-decoration: none; display: inline-block; }
   from { background-position: 100% 0; }
   to { background-position: -100% 0; }
 }
+
+
+
+/* ---------- Home card restyle ---------- */
+.home-cards {
+  /* Point this at your existing accent variable (e.g. var(--gold)) */
+  --hc-accent: var(--gold, var(--accent, currentColor));
+  --hc-line: color-mix(in srgb, currentColor 14%, transparent);
+  --hc-surface: color-mix(in srgb, currentColor 4%, transparent);
+  --hc-radius: 18px;
+}
+
+.hc-head {
+  max-width: 640px;
+  margin-bottom: clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.hc-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hc-textlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  padding-bottom: 2px;
+  transition: gap 0.2s ease, border-color 0.2s ease;
+}
+.hc-textlink:hover {
+  gap: 0.7rem;
+  border-color: currentColor;
+}
+
+/* Grid */
+.hc-grid {
+  display: grid;
+  gap: 1.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hc-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  .hc-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Card base */
+.hc-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.75rem;
+  border: 1px solid var(--hc-line);
+  border-radius: var(--hc-radius);
+  background: var(--hc-surface);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.hc-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  color: var(--hc-accent);
+  background: color-mix(in srgb, var(--hc-accent) 14%, transparent);
+  margin-bottom: 0.4rem;
+}
+.hc-icon svg {
+  width: 24px;
+  height: 24px;
+}
+.hc-icon-soft {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--hc-accent) 40%, transparent);
+}
+
+.hc-tag {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+.hc-title {
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+.hc-body {
+  margin: 0;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+/* Clickable path cards */
+.hc-card-link {
+  padding-bottom: 3.25rem;
+}
+.hc-go {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--hc-line);
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease,
+    border-color 0.25s ease;
+}
+.hc-card-link:hover,
+.hc-card-link:focus-visible {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--hc-accent) 60%, transparent);
+  box-shadow: 0 14px 34px color-mix(in srgb, currentColor 12%, transparent);
+}
+.hc-card-link:hover .hc-go,
+.hc-card-link:focus-visible .hc-go {
+  background: var(--hc-accent);
+  border-color: var(--hc-accent);
+  color: #111;
+  transform: translateX(3px);
+}
+.hc-card-link:focus-visible {
+  outline: 2px solid var(--hc-accent);
+  outline-offset: 3px;
+}
+
+/* Steps */
+.hc-step {
+  overflow: hidden;
+}
+.hc-step-num {
+  position: absolute;
+  top: 0.9rem;
+  right: 1.25rem;
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--hc-accent);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* Promises */
+.hc-promise {
+  border-style: dashed;
+}
+.hc-promise:hover {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--hc-accent) 50%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hc-card,
+  .hc-go,
+  .hc-textlink {
+    transition: none;
+  }
+  .hc-card-link:hover {
+    transform: none;
+  }
+}
